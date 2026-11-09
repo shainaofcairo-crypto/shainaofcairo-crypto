@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SHAINA - Test Reward</title>
+<style>
+body{font-family:sans-serif;padding:20px;background:#fff;color:#111}
+button{background:#111;color:#fff;border:0;padding:14px 20px;border-radius:10px;font-size:16px;width:100%}
+#out{margin-top:16px;background:#f3f3f3;padding:14px;border-radius:10px;white-space:pre-wrap;word-break:break-word}
+input{width:100%;padding:12px;border:1px solid #ccc;border-radius:10px;margin-bottom:12px;font-size:16px}
+</style>
+</head>
+<body>
+<h2>SHAINA OF CAIRO - Test Reward</h2>
+<p>Project: shaina-3 (mainnet)</p>
+<input id="user" value="testuser" placeholder="Pi username">
+<button onclick="test()">Test /api/reward</button>
+<div id="out">Tap the button to test...</div>
+<script>
+async function test(){
+  const out=document.getElementById('out');
+  const username=document.getElementById('user').value||'testuser';
+  out.textContent='Calling /api/reward...';
+  try{
+    const r=await fetch('/api/reward',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,uid:'test-123'})});
+    const t=await r.text();
+    out.textContent='Status: '+r.status+'\n\n'+t;
+  }catch(e){ out.textContent='ERROR: '+e.message; }
+}
+</script>
+</body>
+</html>
