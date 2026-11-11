@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHAINA OF CAIRO - Luxury Abaya</title>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<style>
+*{box-sizing:border-box} body{margin:0;font-family:Arial,sans-serif;background:#fff8f0}
+header{background:#111;color:#fff;padding:14px;text-align:center}
+header h1{margin:0;font-size:22px} header p{margin:4px 0 0;color:#d4af37;font-size:13px}
+.topbar{display:flex;gap:8px;padding:10px}
+.topbar input{flex:1;padding:10px;border-radius:20px;border:1px solid #ddd}
+.topbar button{padding:10px 14px;border:none;border-radius:20px;background:#111;color:#fff}
+.toggle{display:flex;justify-content:center;gap:8px;padding:0 10px 10px}
+.toggle button{padding:8px 18px;border-radius:20px;border:1px solid #111;background:#fff}
+.toggle button.active{background:#111;color:#fff}
+.cats{display:flex;gap:8px;overflow-x:auto;padding:0 10px 10px}
+.cats button{white-space:nowrap;padding:8px 14px;border-radius:20px;border:1px solid #d4af37;background:#fff}
+.cats button.active{background:#d4af37;color:#fff}
+.banner{margin:0 10px 12px;background:#111;color:#fff;border-radius:14px;padding:16px;text-align:center}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 10px 20px}
+.card{border:1px solid #eee;border-radius:14px;overflow:hidden;background:#fff}
+.card img{width:100%;height:180px;object-fit:cover}
+.card .in{padding:10px} .card h3{margin:0 0 4px;font-size:15px}
+.price{font-weight:bold} .pi{color:#7a3cff;font-size:12px}
+.card button{width:100%;margin-top:8px;padding:10px;border:none;border-radius:10px;background:#111;color:#fff}
+.card button.gold{background:#d4af37;color:#111;font-weight:bold}
+#cartDrawer{position:fixed;right:0;top:0;bottom:0;width:92%;max-width:380px;background:#fff;box-shadow:-4px 0 20px rgba(0,0,0,.2);z-index:99;padding:16px;overflow-y:auto;display:none}
+.checkout{width:100%;padding:14px;background:#d4af37;border:none;border-radius:12px;font-weight:bold;margin-top:12px}
+.profile{padding:14px;background:#f9f9f9;border-radius:12px;margin:10px}
+.profile input{width:100%;padding:10px;margin:6px 0;border-radius:10px;border:1px solid #ddd}
+footer{text-align:center;padding:20px;color:#888;font-size:13px}
+</style>
+</head>
+<body>
+<header><h1>SHAINA OF CAIRO</h1><p>Luxury Abaya • Jalabiya • Perfume | Pay with Pi - GCV</p></header>
+<div class="topbar">
+<input id="search" placeholder="Search Abaya, Thobe, Cap, Hijab..." oninput="render()">
+<button onclick="openCart()">🛒 Cart (<span id="cartCount">0</span>)</button>
+<button onclick="loginPi()">👤 Login</button>
+</div>
+<div class="toggle">
+<button id="btnRetail" class="active" onclick="setMode('retail')">RETAIL</button>
+<button id="btnWholesale" onclick="setMode('wholesale')">WHOLESALE -10%</button>
+</div>
+<div class="cats" id="cats"></div>
+<div class="banner"><b>✨ NEW COLLECTION ✨</b><br><small>Abaya ₦35,000 - ₦45,000 • Thobe ₦17,000 • Oil 10g ₦1,500 • GCV 1 Pi = $314,159</small></div>
+<div class="grid" id="grid"></div>
+<div class="profile">
+<h3>👤 My Delivery Details</h3>
+<input id="custName" placeholder="Your Full Name">
+<input id="custPhone" placeholder="Phone / WhatsApp">
+<input id="custAddress" placeholder="Delivery Address">
+</div>
+<footer>SHAINA OF CAIRO • Pay with Pi at GCV • 1 Pi = $314,159 = ₦471,238,500<br>Wholesale 10% OFF on All Products</footer>
+<div id="cartDrawer">
+<button style="float:right" onclick="closeCart()">✖ Close</button>
+<h2>🛒 My Cart</h2>
+<div id="cartItems"></div>
+<div id="cartTotal" style="font-weight:bold;margin-top:12px"></div>
+<button class="checkout" onclick="checkoutPi()">Pay Once With Pi - GCV 💜</button>
+<p style="font-size:12px;color:#666">You pay ONCE for all items. Price at GCV.</p>
+</div>
+<script>
+const RATE=471238500;
+const products=[
+{id:1,cat:"Abaya",name:"Classic Black Abaya",naira:35000,img:"shaina_1.jpg",desc:"Classic Black Abaya - Everyday Luxury"},
+{id:2,cat:"Abaya",name:"Royal Gold Abaya",naira:45000,img:"shaina_2.jpg",desc:"Royal Gold - Premium Edition"},
+{id:3,cat:"Abaya",name:"Cairo Embroidered Abaya",naira:42000,img:"shaina_3.jpg",desc:"Hand Embroidered Cairo Style"},
+{id:4,cat:"Abaya",name:"Pearl White Abaya",naira:40000,img:"shaina_4.jpg",desc:"Pearl White - Eid Special"},
+{id:5,cat:"Abaya",name:"Midnight Blue Abaya",naira:38000,img:"shaina_5.jpg",desc:"Midnight Blue - Elegant"},
+{id:6,cat:"Abaya",name:"Rose Pink Abaya",naira:38000,img:"shaina_6.jpg",desc:"Rose Pink - Soft & Luxury"},
+{id:7,cat:"Jalabiya",name:"Men Jalabiya White",naira:25000,img:"shaina_1.jpg",desc:"Men Jalabiya - White Premium"},
+{id:8,cat:"Jalabiya",name:"Men Jalabiya Black",naira:25000,img:"shaina_2.jpg",desc:"Men Jalabiya - Black Royal"},
+{id:9,cat:"Thobe",name:"White Thobe",naira:17000,img:"shaina_3.jpg",desc:"White Thobe - Classic"},
+{id:10,cat:"Thobe",name:"Black Thobe",naira:17000,img:"shaina_4.jpg",desc:"Black Thobe - Classic"},
+{id:11,cat:"Cap",name:"Prayer Cap White",naira:5000,img:"shaina_5.jpg",desc:"Prayer Cap - White"},
+{id:12,cat:"Cap",name:"Prayer Cap Black",naira:5000,img:"shaina_6.jpg",desc:"Prayer Cap - Black"},
+{id:13,cat:"Hijab",name:"Silk Hijab",naira:8000,img:"shaina_1.jpg",desc:"Silk Hijab - Soft"},
+{id:14,cat:"Hijab",name:"Cotton Hijab",naira:6000,img:"shaina_2.jpg",desc:"Cotton Hijab - Everyday"},
+{id:15,cat:"Perfume",name:"Oud Perfume Oil 10g",naira:1500,img:"shaina_3.jpg",desc:"Oud Oil 10g - Long Lasting"},
+{id:16,cat:"Perfume",name:"Musk Perfume Oil 10g",naira:1500,img:"shaina_4.jpg",desc:"Musk Oil 10g - Sweet"},
+{id:17,cat:"Perfume",name:"Rose Perfume Oil 10g",naira:1500,img:"shaina_5.jpg",desc:"Rose Oil 10g - Fresh"},
+{id:18,cat:"Perfume",name:"Amber Perfume Oil 10g",naira:1500,img:"shaina_6.jpg",desc:"Amber Oil 10g - Warm"},
+];
+let mode='retail'; let curCat='All'; let cart=JSON.parse(localStorage.getItem('shaina_cart')||'[]');
+function price(p){let pr=p.naira; if(mode==='wholesale') pr=Math.round(pr*0.9); return pr;}
+function piPrice(p){return (price(p)/RATE).toFixed(7);}
+function renderCats(){
+let cats=['All',...new Set(products.map(p=>p.cat))];
+document.getElementById('cats').innerHTML=cats.map(c=>`<button class="${c===curCat?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+}
+function setCat(c){curCat=c; render();}
+function setMode(m){mode=m; document.getElementById('btnRetail').className=m==='retail'?'active':''; document.getElementById('btnWholesale').className=m==='wholesale'?'active':''; render();}
+function render(){
+renderCats();
+let q=(document.getElementById('search').value||'').toLowerCase();
+let list=products.filter(p=>(curCat==='All'||p.cat===curCat)&&(p.name.toLowerCase().includes(q)||p.cat.toLowerCase().includes(q)));
+document.getElementById('grid').innerHTML=list.map(p=>`
+<div class="card">
+<img src="${p.img}" onerror="this.src='shaina_1.jpg'">
+<div class="in"><h3>${p.name}</h3><div style="font-size:12px;color:#888">${p.cat} • ${p.desc}</div>
+<div class="price">₦${price(p).toLocaleString()} ${mode==='wholesale'?'<span style="color:green;font-size:11px">WHOLESALE -10%</span>':''}</div>
+<div class="pi">💜 ${piPrice(p)} Pi (GCV)</div>
+<button onclick="addToCart(${p.id})">Add to Cart</button>
+<button class="gold" onclick="buyNow(${p.id})">Buy Now With Pi 💜</button>
+</div></div>`).join('');
+updateCartUI();
+}
+function addToCart(id){let f=cart.find(x=>x.id===id); if(f) f.qty++; else cart.push({id,qty:1}); saveCart(); alert('Added to cart!');}
+function buyNow(id){addToCart(id); openCart();}
+function saveCart(){localStorage.setItem('shaina_cart',JSON.stringify(cart)); updateCartUI();}
+function updateCartUI(){let n=cart.reduce((a,c)=>a+c.qty,0); document.getElementById('cartCount').innerText=n;
+let items=document.getElementById('cartItems'); if(!items) return;
+if(cart.length===0){items.innerHTML='Cart is empty'; document.getElementById('cartTotal').innerHTML=''; return;}
+let total=0; items.innerHTML=cart.map(c=>{let p=products.find(x=>x.id===c.id); let pr=price(p)*c.qty; total+=pr; return `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee"><span>${p.name} x ${c.qty}</span><span>₦${pr.toLocaleString()}<br><button onclick="removeItem(${c.id})">Remove</button></span></div>`}).join('');
+document.getElementById('cartTotal').innerHTML=`Total: ₦${total.toLocaleString()} = ${(total/RATE).toFixed(7)} Pi`;
+}
+function removeItem(id){cart=cart.filter(x=>x.id!==id); saveCart();}
+function openCart(){updateCartUI(); document.getElementById('cartDrawer').style.display='block';}
+function closeCart(){document.getElementById('cartDrawer').style.display='none';}
+  async function loginPi(){
+try{
+if(typeof Pi==='undefined'){alert('Open this shop inside Pi Browser to login with Pi'); return;}
+await Pi.init({version:"2.0",sandbox:false});
+let auth=await Pi.authenticate(['username','payments'],(p)=>{});
+alert('Welcome '+auth.user.username+'! You are logged in 💜');
+}catch(e){alert('Login failed. Open in Pi Browser.');}
+}
+async function checkoutPi(){
+if(cart.length===0){alert('Cart is empty!'); return;}
+let totalNaira=cart.reduce((sum,c)=>{let p=products.find(x=>x.id===c.id); return sum+price(p)*c.qty},0);
+let totalPi=parseFloat((totalNaira/RATE).toFixed(7));
+let name=document.getElementById('custName').value||'';
+let phone=document.getElementById('custPhone').value||'';
+let addr=document.getElementById('custAddress').value||'';
+if(!name||!phone||!addr){alert('Please fill Your Name, Phone and Delivery Address first!'); return;}
+if(typeof Pi==='undefined'){alert('Please open this shop inside Pi Browser to pay with Pi. Total: '+totalPi+' Pi'); return;}
+try{
+await Pi.init({version:"2.0",sandbox:false});
+let auth=await Pi.authenticate(['username','payments'],(p)=>{});
+let orderData={amount:totalPi, memo:"SHAINA OF CAIRO - "+cart.length+" items - "+name+" - "+phone+" - "+addr, metadata:{items:cart, customer:{name,phone,address:addr}, totalNaira, mode}};
+let payment=await Pi.createPayment(orderData,{
+onReadyForServerApproval:(pid)=>fetch('/api/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:pid})}),
+onReadyForServerCompletion:(pid,txid)=>fetch('/api/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:pid,txid})}),
+onCancel:(pid)=>alert('Payment cancelled'),
+onError:(e,pid)=>alert('Payment error: '+e.message)
+});
+cart=[]; saveCart(); closeCart();
+alert('Payment Successful! Thank you '+name+'! We will contact you on '+phone+' for delivery 💜');
+}catch(e){alert('Payment failed: '+e.message+' - Total was '+totalPi+' Pi');}
+}
+render();
+</script>
+</body>
+</html>
